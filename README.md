@@ -21,8 +21,10 @@ then run test.exe
   
   
   
-LINUX SETUP  
+LINUX SETUP - Tested with Ubuntu using VirtualBox  
 --------------  
+NOTE : I was able to get OpenGL 4.5 on VirtualBox with this setup.  
+  
 Get GCC for Linux  
 sudo apt install gcc  
   
