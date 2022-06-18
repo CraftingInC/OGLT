@@ -8,6 +8,10 @@ int main()
 	glfwInit();
     FILE* lf = fopen("log.txt", "ab");
 
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
 	GLFWwindow* window = glfwCreateWindow(1280, 720, "OpenGL GUI DEMO", NULL, NULL);
 	if (!window)
 	{

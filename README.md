@@ -29,6 +29,9 @@ NOTE : I was able to get OpenGL 4.5 on VirtualBox with this setup.
 Get GCC for Linux  
 sudo apt install gcc  
   
+NOTE : If you need to update MESA here is a link of info on how to do that. Mesa 22.1.2 is out, however at the time of my writing this, you can't access it yet. Mesa 22.1.2 fixes an OpenGL get string error, where it reports OpenGL 4.5 instead of 4.6. Sadly, I was not able to get it to use 4.6 with Mesa 22.1.1, which was the latest version I could test in virtualbox.  
+https://itsfoss.com/install-mesa-ubuntu/  
+  
 If you need GLXINFO  
 sudo apt install mesa-utils  
   
