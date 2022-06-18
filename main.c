@@ -1,7 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <stdio.h>
 #include "logging.h"
+#include <stdio.h>   // printf()
 
 int main()
 {
@@ -12,11 +12,10 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow* window = glfwCreateWindow(1280, 720, "OpenGL GUI DEMO", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(1280, 720, "OpenGL Template", NULL, NULL);
 	if (!window)
 	{
 	    log(lf, "ERROR : Failed to create the GLFW window !");
-		printf("Failed to create the GLFW window\n");
 		glfwTerminate();
 	}
 	glfwMakeContextCurrent(window);
@@ -25,7 +24,6 @@ int main()
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 	    log(lf, "ERROR : Failed to initialize OpenGL context !");
-		printf("Failed to initialize OpenGL context\n");
 	}
 
     glClearColor(0.5f, 0.5f, 0.9f, 1.0f);
