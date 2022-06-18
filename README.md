@@ -8,8 +8,9 @@ WINDOWS SETUP
 Get GCC for windows -- Tested this stable version on windows 10  
 https://nuwen.net/mingw.html  
   
-Get GLFW3  
-https://github.com/glfw/glfw/releases/download/3.3.7/glfw-3.3.7.bin.WIN64.zip  
+Get GLFW3 - Get the 64-Bit Windows Pre-Compiled Binaries  
+https://www.glfw.org/download.html  
+EXAMPLE : https://github.com/glfw/glfw/releases/download/3.3.7/glfw-3.3.7.bin.WIN64.zip  
 Extract zip into libs folder.  
 EXAMPLE : The include path should look like this -> libs/glfw-3.3.6.bin.WIN64/include  
   
