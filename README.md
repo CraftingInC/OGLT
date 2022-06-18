@@ -11,11 +11,12 @@ https://nuwen.net/mingw.html
 Get GLFW3 - Get the 64-Bit Windows Pre-Compiled Binaries  
 https://www.glfw.org/download.html  
 EXAMPLE : https://github.com/glfw/glfw/releases/download/3.3.7/glfw-3.3.7.bin.WIN64.zip  
+NOTE : Pay attention to the version number.  
 Extract zip into libs folder.  
-EXAMPLE : The include path should look like this -> libs/glfw-3.3.6.bin.WIN64/include  
+EXAMPLE : The include path should look like this -> libs/glfw-3.3.7.bin.WIN64/include  
   
 Run this whole line at the command prompt.  
-gcc -O2 -m64 -o test main.c libs/glad/glad/glad.c -I./libs/glad/ -I./libs/glfw-3.3.6.bin.WIN64/include/ -L./libs/glfw-3.3.6.bin.WIN64/lib-mingw-w64/ -lglfw3 -lgdi32
+gcc -O2 -m64 -o test main.c libs/glad/glad/glad.c -I./libs/glad/ -I./libs/glfw-3.3.7.bin.WIN64/include/ -L./libs/glfw-3.3.7.bin.WIN64/lib-mingw-w64/ -lglfw3 -lgdi32
   
 then run test.exe  
   
