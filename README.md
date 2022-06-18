@@ -3,6 +3,12 @@
 An OpenGL Template for my Crafting_In_C youtube dev log series.  
 https://www.youtube.com/channel/UCEoiNRR8b54dRWYoonnfoLA/videos  
   
+Part 1  
+https://www.youtube.com/watch?v=ks_BR217DM0  
+  
+Part 2  
+https://www.youtube.com/watch?v=6PTPamwGtkg  
+  
 WINDOWS SETUP  
 --------------  
 Get GCC for windows -- Tested this stable version on windows 10  
