@@ -21,6 +21,9 @@ NOTE : Pay attention to the version number.
 Extract zip into libs folder.  
 EXAMPLE : The include path should look like this -> libs/glfw-3.3.7.bin.WIN64/include  
   
+Instead of GLEW I use GLAD.  
+https://glad.dav1d.de/  
+  
 Run this whole line at the command prompt.  
 gcc -O2 -m64 -o test main.c libs/glad/glad/glad.c -I./libs/glad/ -I./libs/glfw-3.3.7.bin.WIN64/include/ -L./libs/glfw-3.3.7.bin.WIN64/lib-mingw-w64/ -lglfw3 -lgdi32
   
@@ -43,6 +46,9 @@ sudo apt install mesa-utils
   
 Get GLFW3  
 sudo apt install libglfw3-dev  
+  
+Instead of GLEW I use GLAD.  
+https://glad.dav1d.de/  
   
 gcc -O2 -m64 -o test main.c libs/glad/glad/glad.c -I./libs/glad/ -I/usr/include/libdrm -lglfw
   
