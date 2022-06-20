@@ -76,6 +76,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     }
 }
 
+float greenValue;
+
 // INPUT
 void processInput(GLFWwindow *window)
 {
@@ -92,14 +94,17 @@ void processInput(GLFWwindow *window)
     if(MSTATS.isLeftMouseDown)
     {
         printf("Left Mouse Button Pressed\n");
+        greenValue = 0.1f;
     }
     if(MSTATS.isMiddleMouseDown)
     {
         printf("Middle Mouse Button Pressed\n");
+        greenValue = 0.5f;
     }
     if(MSTATS.isRightMouseDown)
     {
         printf("Right Mouse Button Pressed\n");
+        greenValue = 0.9f;
     }
 
     if(MSTATS.wheelState == -1)
@@ -122,9 +127,10 @@ const char *vertexShaderSource = "#version 450 core\n"
 
 const char *fragmentShaderSource = "#version 450 core\n"
     "out vec4 FragColor;\n"
+    "uniform vec4 ourColor;\n"
     "void main()\n"
     "{\n"
-    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+    "   FragColor = ourColor;\n"
     "}\n";
 
     float vertices[] = {
@@ -232,12 +238,17 @@ int main()
 
     glBindVertexArray(0);
 
+    int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+
+    greenValue = 1.0f;
+
 	while (!glfwWindowShouldClose(window))
 	{
 	    processInput(window);
 	    glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(shaderProgram);
+        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
