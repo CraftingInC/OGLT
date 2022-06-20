@@ -2,6 +2,27 @@
 #include <GLFW/glfw3.h>
 #include "logging.h"
 #include <stdio.h>   // printf()
+#include <stdbool.h> // BOOL
+
+struct mouseStats {
+    int xpos;
+    int ypos;
+    bool mouseMoved;
+    bool isLeftMouseDown;
+    bool isMiddleMouseDown;
+    bool isRightMouseDown;
+    int wheelState;
+} MSTATS;
+
+bool isMouseMoved()
+{
+    return MSTATS.mouseMoved;
+}
+
+void setMouseMovedFalse()
+{
+    MSTATS.mouseMoved = false;
+}
 
 // Callbacks
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -9,11 +30,87 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
+void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
+{
+    MSTATS.xpos = (int)(xposIn);
+    MSTATS.ypos = (int)(yposIn);
+
+    MSTATS.mouseMoved = true;
+}
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    {
+        MSTATS.isLeftMouseDown = true;
+    } else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+    {
+        MSTATS.isLeftMouseDown = false;
+    }
+
+    if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS)
+    {
+        MSTATS.isMiddleMouseDown = true;
+    } else if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_RELEASE)
+    {
+        MSTATS.isMiddleMouseDown = false;
+    }
+
+    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+    {
+        MSTATS.isRightMouseDown = true;
+    } else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
+    {
+        MSTATS.isRightMouseDown = false;
+    }
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    if(yoffset < 0)
+    {
+        MSTATS.wheelState = -1;
+    } else if(yoffset > 0)
+    {
+        MSTATS.wheelState = 1;
+    }
+}
+
 // INPUT
 void processInput(GLFWwindow *window)
 {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    {
         glfwSetWindowShouldClose(window, 1);
+    }
+
+    if(isMouseMoved())
+    {
+        printf("X: %d / Y: %d\n", MSTATS.xpos, MSTATS.ypos);
+    }
+
+    if(MSTATS.isLeftMouseDown)
+    {
+        printf("Left Mouse Button Pressed\n");
+    }
+    if(MSTATS.isMiddleMouseDown)
+    {
+        printf("Middle Mouse Button Pressed\n");
+    }
+    if(MSTATS.isRightMouseDown)
+    {
+        printf("Right Mouse Button Pressed\n");
+    }
+
+    if(MSTATS.wheelState == -1)
+    {
+        printf("Scrolling DOWN\n");
+        MSTATS.wheelState = 0;
+    } else if(MSTATS.wheelState == 1)
+    {
+        printf("Scrolling UP\n");
+        MSTATS.wheelState = 0;
+    }
 }
 
 const char *vertexShaderSource = "#version 450 core\n"
@@ -22,6 +119,7 @@ const char *vertexShaderSource = "#version 450 core\n"
     "{\n"
     "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
     "}\n";
+
 const char *fragmentShaderSource = "#version 450 core\n"
     "out vec4 FragColor;\n"
     "void main()\n"
@@ -33,11 +131,11 @@ const char *fragmentShaderSource = "#version 450 core\n"
          0.5f,  0.5f, 0.0f,
          0.5f, -0.5f, 0.0f,
         -0.5f, -0.5f, 0.0f,
-        -0.5f,  0.5f, 0.0f 
+        -0.5f,  0.5f, 0.0f
     };
     unsigned int indices[] = {
         0, 1, 3,
-        1, 2, 3 
+        1, 2, 3
     };
 
 int main()
@@ -64,6 +162,9 @@ int main()
 	}
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
+	glfwSetScrollCallback(window, scroll_callback);
 
     glClearColor(0.5f, 0.5f, 0.9f, 1.0f);
 	glViewport(0, 0, 1280, 720);
@@ -82,6 +183,7 @@ int main()
     {
         glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
         log(lf, "ERROR : SHADER::VERTEX::COMPILATION_FAILED\n%s\n", infoLog);
+        printf("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n%s\n", infoLog);
     }
 
     unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -93,6 +195,7 @@ int main()
     {
         glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
         log(lf, "ERROR : SHADER::FRAGMENT::COMPILATION_FAILED\n%s\n", infoLog);
+        printf("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n%s\n", infoLog);
     }
 
     unsigned int shaderProgram = glCreateProgram();
@@ -104,6 +207,7 @@ int main()
     if (!success) {
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
         log(lf, "ERROR : SHADER::PROGRAM::LINKING_FAILED\n%s\n", infoLog);
+        printf("ERROR::SHADER::PROGRAM::LINKING_FAILED\n%s\n", infoLog);
     }
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
@@ -138,6 +242,7 @@ int main()
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 		glfwSwapBuffers(window);
+		setMouseMovedFalse();
 		glfwPollEvents();
 	}
 
