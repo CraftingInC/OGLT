@@ -4,6 +4,33 @@
 #include <stdio.h>   // printf()
 #include <stdbool.h> // BOOL
 
+const char *vertexShaderSource = "#version 450 core\n"
+    "layout (location = 0) in vec3 position;\n"
+    "uniform vec3 positionOffset;\n"
+    "void main()\n"
+    "{\n"
+    "   gl_Position = vec4(position.xyz + positionOffset.xyz, 1.0);\n"
+    "}\n";
+
+const char *fragmentShaderSource = "#version 450 core\n"
+    "out vec4 FragColor;\n"
+    "uniform vec4 ourColor;\n"
+    "void main()\n"
+    "{\n"
+    "   FragColor = ourColor;\n"
+    "}\n";
+
+    float vertices[] = {
+         0.5f,  0.5f, 0.0f,
+         0.5f, -0.5f, 0.0f,
+        -0.5f, -0.5f, 0.0f,
+        -0.5f,  0.5f, 0.0f
+    };
+    unsigned int indices[] = {
+        0, 1, 3,
+        1, 2, 3
+    };
+
 struct mouseStats {
     int xpos;
     int ypos;
@@ -76,7 +103,22 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
     }
 }
 
+void MessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+                     const GLchar* message, const void* userParam)
+{
+    (void) source;
+    (void) id;
+    (void) length;
+    (void) userParam;
+    fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+            (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity, message);
+}
+
+// Few nasty Globals  :P
 float greenValue;
+float pOffsetY;
+GLFWwindow* window;
+FILE* lf;
 
 // INPUT
 void processInput(GLFWwindow *window)
@@ -86,78 +128,60 @@ void processInput(GLFWwindow *window)
         glfwSetWindowShouldClose(window, 1);
     }
 
-    if(isMouseMoved())
+    if(isMouseMoved() && MSTATS.isLeftMouseDown)
     {
         printf("X: %d / Y: %d\n", MSTATS.xpos, MSTATS.ypos);
     }
 
     if(MSTATS.isLeftMouseDown)
     {
-        printf("Left Mouse Button Pressed\n");
         greenValue = 0.1f;
     }
     if(MSTATS.isMiddleMouseDown)
     {
-        printf("Middle Mouse Button Pressed\n");
         greenValue = 0.5f;
     }
     if(MSTATS.isRightMouseDown)
     {
-        printf("Right Mouse Button Pressed\n");
         greenValue = 0.9f;
     }
 
     if(MSTATS.wheelState == -1)
     {
-        printf("Scrolling DOWN\n");
+        pOffsetY += -0.03f;
         MSTATS.wheelState = 0;
     } else if(MSTATS.wheelState == 1)
     {
-        printf("Scrolling UP\n");
+        pOffsetY += 0.03f;
         MSTATS.wheelState = 0;
     }
 }
 
-const char *vertexShaderSource = "#version 450 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}\n";
-
-const char *fragmentShaderSource = "#version 450 core\n"
-    "out vec4 FragColor;\n"
-    "uniform vec4 ourColor;\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = ourColor;\n"
-    "}\n";
-
-    float vertices[] = {
-         0.5f,  0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-        -0.5f, -0.5f, 0.0f,
-        -0.5f,  0.5f, 0.0f
-    };
-    unsigned int indices[] = {
-        0, 1, 3,
-        1, 2, 3
-    };
+void quitProgram()
+{
+    if(window)
+    {
+        glfwDestroyWindow(window);
+        log(lf, "INFO : Window Closed");
+    }
+    glfwTerminate();
+    fclose(lf);
+}
 
 int main()
 {
 	glfwInit();
-    FILE* lf = fopen("log.txt", "ab");
+    lf = fopen("log.txt", "ab");
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow* window = glfwCreateWindow(1280, 720, "OpenGL Template", NULL, NULL);
+	window = glfwCreateWindow(1280, 720, "OpenGL Template", NULL, NULL);
 	if (!window)
 	{
 	    log(lf, "ERROR : Failed to create the GLFW window !");
-		glfwTerminate();
+		quitProgram();
 	}
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
@@ -165,12 +189,15 @@ int main()
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
 	    log(lf, "ERROR : Failed to initialize OpenGL context !");
+	    quitProgram();
 	}
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
 	glfwSetScrollCallback(window, scroll_callback);
+
+	glDebugMessageCallback(MessageCallback, 0);
 
     glClearColor(0.5f, 0.5f, 0.9f, 1.0f);
 	glViewport(0, 0, 1280, 720);
@@ -190,6 +217,7 @@ int main()
         glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
         log(lf, "ERROR : SHADER::VERTEX::COMPILATION_FAILED\n%s\n", infoLog);
         printf("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n%s\n", infoLog);
+        quitProgram();
     }
 
     unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -202,6 +230,7 @@ int main()
         glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
         log(lf, "ERROR : SHADER::FRAGMENT::COMPILATION_FAILED\n%s\n", infoLog);
         printf("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n%s\n", infoLog);
+        quitProgram();
     }
 
     unsigned int shaderProgram = glCreateProgram();
@@ -214,6 +243,7 @@ int main()
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
         log(lf, "ERROR : SHADER::PROGRAM::LINKING_FAILED\n%s\n", infoLog);
         printf("ERROR::SHADER::PROGRAM::LINKING_FAILED\n%s\n", infoLog);
+        quitProgram();
     }
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
@@ -239,8 +269,10 @@ int main()
     glBindVertexArray(0);
 
     int vertexColorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+    int positionOffsetLocation = glGetUniformLocation(shaderProgram, "positionOffset");
 
     greenValue = 1.0f;
+    pOffsetY = 0.0f;
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -248,6 +280,7 @@ int main()
 	    glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(shaderProgram);
+        glUniform3f(positionOffsetLocation, 0.0f, pOffsetY, 0.0f);
         glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -262,10 +295,7 @@ int main()
     glDeleteBuffers(1, &EBO);
     glDeleteProgram(shaderProgram);
 
-	glfwDestroyWindow(window);
-	glfwTerminate();
-
-	log(lf, "INFO : Window Closed");
-    fclose(lf);
+	quitProgram();
+	return 0;
 }
 
